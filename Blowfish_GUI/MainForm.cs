@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using BlowFishCS;
+using Microsoft.VisualBasic.Devices;
+using System;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using BlowFishCS;
-using Microsoft.VisualBasic.Devices;
+using System.Text;
+using System.Windows.Forms;
 
 namespace Blowfish_GUI
 {
@@ -23,11 +18,18 @@ namespace Blowfish_GUI
         private MemoryMappedFile mmf_file;
         private MemoryMappedFile mmf_key;
         private string outputPath = "";
-        private bool currentCompatMode;
+        private bool currentCompatMode = true;
+        private bool currentStandardMode = false;
 
         public MainForm()
         {
             InitializeComponent();
+        }
+
+        private void standardModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            standardModeToolStripMenuItem.Checked = !standardModeToolStripMenuItem.Checked;
+            currentStandardMode = standardModeToolStripMenuItem.Checked;
         }
 
         private void compatModeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -93,6 +95,8 @@ namespace Blowfish_GUI
         {
             if (beforeConverting())
             {
+                logBox.Text += string.Format("Decrypting with compat mode = {0}\r\n", compatModeToolStripMenuItem.Checked);
+                logBox.Text += string.Format("Decrypting with standard mode = {0}\r\n", standardModeToolStripMenuItem.Checked);
                 backgroundDecrypt.RunWorkerAsync();
             }
         }
@@ -101,6 +105,8 @@ namespace Blowfish_GUI
         {
             if (beforeConverting())
             {
+                logBox.Text += string.Format("Encrypting with compat mode = {0}\r\n", compatModeToolStripMenuItem.Checked);
+                logBox.Text += string.Format("Encrypting with standard mode = {0}\r\n", standardModeToolStripMenuItem.Checked);
                 backgroundEncrypt.RunWorkerAsync();
             }
         }
@@ -113,10 +119,6 @@ namespace Blowfish_GUI
 
         private void backgroundEncrypt_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (mmf_file != null)
-                mmf_file.Dispose();
-            if (mmf_key != null)
-                mmf_key.Dispose();
             StatusLabel.Text = "File encrypted";
             System.Threading.Thread.Sleep(700);
             progressBar.Value = 0;
@@ -124,10 +126,6 @@ namespace Blowfish_GUI
 
         private void backgroundDecrypt_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (mmf_file != null)
-                mmf_file.Dispose();
-            if (mmf_key != null)
-                mmf_key.Dispose();
             StatusLabel.Text = "File decrypted";
             System.Threading.Thread.Sleep(700);
             progressBar.Value = 0;
@@ -147,14 +145,20 @@ namespace Blowfish_GUI
                 {
                     e.Cancel = true;
                     if (mmf_file != null)
+                    {
                         mmf_file.Dispose();
+                    }
+
                     if (mmf_key != null)
+                    {
                         mmf_key.Dispose();
+                    }
                 }
                 else
                 {
                     var bl = new BlowFish(keyInMemory);
-                    bl.compatMode = currentCompatMode;
+                    bl.CompatMode = currentCompatMode;
+                    bl.NonStandard = !currentStandardMode;
                     worker.ReportProgress(25);
                     var decryptedBytes = bl.Decrypt_ECB(fileInMemory);
                     worker.ReportProgress(25);
@@ -163,7 +167,9 @@ namespace Blowfish_GUI
                 }
             }
             else
+            {
                 StatusLabel.Text = "Not converting (oom)";
+            }
         }
 
         private void backgroundEncrypt_DoWork(object sender, DoWorkEventArgs e)
@@ -180,14 +186,20 @@ namespace Blowfish_GUI
                 {
                     e.Cancel = true;
                     if (mmf_file != null)
+                    {
                         mmf_file.Dispose();
+                    }
+
                     if (mmf_key != null)
+                    {
                         mmf_key.Dispose();
+                    }
                 }
                 else
                 {
-                    var bl = new BlowFish(keyTextBox.Text);
-                    bl.compatMode = currentCompatMode;
+                    var bl = new BlowFish(keyInMemory);
+                    bl.CompatMode = currentCompatMode;
+                    bl.NonStandard = !currentStandardMode;
                     worker.ReportProgress(25);
                     var decryptedBytes = bl.Encrypt_ECB(fileInMemory);
                     worker.ReportProgress(25);
@@ -196,7 +208,9 @@ namespace Blowfish_GUI
                 }
             }
             else
+            {
                 StatusLabel.Text = "Not converting (oom)";
+            }
         }
 
         private bool beforeConverting()
@@ -268,7 +282,7 @@ namespace Blowfish_GUI
                         return false;
                 }
             }
-            return false;
+            return true;
         }
 
         private void loadingFilesWorker(BackgroundWorker worker, DoWorkEventArgs e)
@@ -277,10 +291,14 @@ namespace Blowfish_GUI
             {
                 e.Cancel = true;
                 if (mmf_file != null)
+                {
                     mmf_file.Dispose();
-                if (mmf_key != null)
-                    mmf_key.Dispose();
+                }
 
+                if (mmf_key != null)
+                {
+                    mmf_key.Dispose();
+                }
             }
             else
             {
@@ -290,9 +308,13 @@ namespace Blowfish_GUI
                     fileInMemory = new byte[fileSize];
                     mmfAccessor.ReadArray<byte>(0, fileInMemory, 0, (int)fileSize);
                     if (mmf_key == null)
+                    {
                         worker.ReportProgress(12);
+                    }
                     else
+                    {
                         worker.ReportProgress(25);
+                    }
                 }
 
                 if (mmf_key != null)
@@ -302,12 +324,16 @@ namespace Blowfish_GUI
                     mmfAccessor.ReadArray<byte>(0, keyInMemory, 0, (int)keySize);
 
                     if (mmf_file == null)
+                    {
                         worker.ReportProgress(13);
+                    }
                     else
+                    {
                         worker.ReportProgress(25);
+                    }
                 }
                 worker.ReportProgress(25);
-            } 
+            }
         }
 
         //converts a hex string to a byte array

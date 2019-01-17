@@ -57,6 +57,7 @@
             this.outputDialog = new System.Windows.Forms.SaveFileDialog();
             this.compatModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logBox = new System.Windows.Forms.TextBox();
+            this.standardModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabs.SuspendLayout();
@@ -79,6 +80,7 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.standardModeToolStripMenuItem,
             this.compatModeToolStripMenuItem,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -340,12 +342,23 @@
             // 
             // logBox
             // 
+            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.logBox.Location = new System.Drawing.Point(497, 163);
             this.logBox.Multiline = true;
             this.logBox.Name = "logBox";
             this.logBox.ReadOnly = true;
             this.logBox.Size = new System.Drawing.Size(299, 229);
             this.logBox.TabIndex = 13;
+            // 
+            // standardModeToolStripMenuItem
+            // 
+            this.standardModeToolStripMenuItem.Checked = false;
+            this.standardModeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Unchecked;
+            this.standardModeToolStripMenuItem.Name = "standardModeToolStripMenuItem";
+            this.standardModeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.standardModeToolStripMenuItem.Text = "Standard mode";
+            this.standardModeToolStripMenuItem.Click += new System.EventHandler(this.standardModeToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -359,6 +372,7 @@
             this.Controls.Add(this.fileTextBox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.MinimumSize = new System.Drawing.Size(800, 400);
             this.Name = "MainForm";
             this.Text = "BlowFish GUI";
             this.menuStrip1.ResumeLayout(false);
@@ -406,6 +420,7 @@
         private System.Windows.Forms.SaveFileDialog outputDialog;
         private System.Windows.Forms.ToolStripMenuItem compatModeToolStripMenuItem;
         private System.Windows.Forms.TextBox logBox;
+        private System.Windows.Forms.ToolStripMenuItem standardModeToolStripMenuItem;
     }
 }
 
