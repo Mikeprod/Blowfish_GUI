@@ -1,6 +1,6 @@
 ﻿namespace Blowfish_GUI
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Variable nécessaire au concepteur.
@@ -32,8 +32,8 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.fileTextBox = new System.Windows.Forms.TextBox();
             this.FileDialog = new System.Windows.Forms.OpenFileDialog();
             this.KeyDialog = new System.Windows.Forms.OpenFileDialog();
@@ -55,6 +55,8 @@
             this.backgroundEncrypt = new System.ComponentModel.BackgroundWorker();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.outputDialog = new System.Windows.Forms.SaveFileDialog();
+            this.compatModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.logBox = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.tabs.SuspendLayout();
@@ -77,6 +79,7 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.compatModeToolStripMenuItem,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -85,8 +88,9 @@
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(97, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.quitToolStripMenuItem.Text = "Quit";
+            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -99,17 +103,17 @@
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // progressBar
-            // 
-            this.progressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(100, 16);
-            // 
             // StatusLabel
             // 
             this.StatusLabel.Name = "StatusLabel";
             this.StatusLabel.Size = new System.Drawing.Size(39, 17);
             this.StatusLabel.Text = "Status";
+            // 
+            // progressBar
+            // 
+            this.progressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(100, 16);
             // 
             // fileTextBox
             // 
@@ -177,7 +181,7 @@
             this.tabs.Location = new System.Drawing.Point(497, 27);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(303, 365);
+            this.tabs.Size = new System.Drawing.Size(303, 133);
             this.tabs.TabIndex = 11;
             // 
             // tab1
@@ -188,7 +192,7 @@
             this.tab1.Location = new System.Drawing.Point(4, 22);
             this.tab1.Name = "tab1";
             this.tab1.Padding = new System.Windows.Forms.Padding(3);
-            this.tab1.Size = new System.Drawing.Size(295, 339);
+            this.tab1.Size = new System.Drawing.Size(295, 107);
             this.tab1.TabIndex = 0;
             this.tab1.Text = "File Options";
             this.tab1.UseVisualStyleBackColor = true;
@@ -206,7 +210,7 @@
             // ImportFile
             // 
             this.ImportFile.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.ImportFile.Location = new System.Drawing.Point(3, 313);
+            this.ImportFile.Location = new System.Drawing.Point(3, 81);
             this.ImportFile.Name = "ImportFile";
             this.ImportFile.Size = new System.Drawing.Size(289, 23);
             this.ImportFile.TabIndex = 8;
@@ -236,7 +240,7 @@
             this.tab2.Location = new System.Drawing.Point(4, 22);
             this.tab2.Name = "tab2";
             this.tab2.Padding = new System.Windows.Forms.Padding(3);
-            this.tab2.Size = new System.Drawing.Size(295, 339);
+            this.tab2.Size = new System.Drawing.Size(295, 107);
             this.tab2.TabIndex = 1;
             this.tab2.Text = "Key Options";
             this.tab2.UseVisualStyleBackColor = true;
@@ -268,7 +272,7 @@
             // ImportKey
             // 
             this.ImportKey.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.ImportKey.Location = new System.Drawing.Point(3, 313);
+            this.ImportKey.Location = new System.Drawing.Point(3, 81);
             this.ImportKey.Name = "ImportKey";
             this.ImportKey.Size = new System.Drawing.Size(289, 23);
             this.ImportKey.TabIndex = 5;
@@ -282,7 +286,7 @@
             this.tab3.Location = new System.Drawing.Point(4, 22);
             this.tab3.Name = "tab3";
             this.tab3.Padding = new System.Windows.Forms.Padding(3);
-            this.tab3.Size = new System.Drawing.Size(295, 339);
+            this.tab3.Size = new System.Drawing.Size(295, 107);
             this.tab3.TabIndex = 2;
             this.tab3.Text = "Output Options";
             this.tab3.UseVisualStyleBackColor = true;
@@ -290,7 +294,7 @@
             // ouputButton
             // 
             this.ouputButton.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.ouputButton.Location = new System.Drawing.Point(3, 313);
+            this.ouputButton.Location = new System.Drawing.Point(3, 81);
             this.ouputButton.Name = "ouputButton";
             this.ouputButton.Size = new System.Drawing.Size(289, 23);
             this.ouputButton.TabIndex = 0;
@@ -307,7 +311,8 @@
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -324,18 +329,37 @@
             // 
             this.outputDialog.FileOk += new System.ComponentModel.CancelEventHandler(this.outputDialog_FileOk);
             // 
-            // Form1
+            // compatModeToolStripMenuItem
+            // 
+            this.compatModeToolStripMenuItem.Checked = true;
+            this.compatModeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.compatModeToolStripMenuItem.Name = "compatModeToolStripMenuItem";
+            this.compatModeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.compatModeToolStripMenuItem.Text = "Compat mode";
+            this.compatModeToolStripMenuItem.Click += new System.EventHandler(this.compatModeToolStripMenuItem_Click);
+            // 
+            // logBox
+            // 
+            this.logBox.Location = new System.Drawing.Point(497, 163);
+            this.logBox.Multiline = true;
+            this.logBox.Name = "logBox";
+            this.logBox.ReadOnly = true;
+            this.logBox.Size = new System.Drawing.Size(299, 229);
+            this.logBox.TabIndex = 13;
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.logBox);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.tabs);
             this.Controls.Add(this.keyTextBox);
             this.Controls.Add(this.fileTextBox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "BlowFish GUI";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -380,6 +404,8 @@
         private System.Windows.Forms.ListBox encodingListKey;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.SaveFileDialog outputDialog;
+        private System.Windows.Forms.ToolStripMenuItem compatModeToolStripMenuItem;
+        private System.Windows.Forms.TextBox logBox;
     }
 }
 

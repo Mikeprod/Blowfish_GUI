@@ -14,18 +14,31 @@ using Microsoft.VisualBasic.Devices;
 
 namespace Blowfish_GUI
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        byte[] fileInMemory;
-        byte[] keyInMemory;
-        long fileSize = -1;
-        long keySize = -1;
-        MemoryMappedFile mmf_file;
-        MemoryMappedFile mmf_key;
-        string outputPath = "";
-        public Form1()
+        private byte[] fileInMemory;
+        private byte[] keyInMemory;
+        private long fileSize = -1;
+        private long keySize = -1;
+        private MemoryMappedFile mmf_file;
+        private MemoryMappedFile mmf_key;
+        private string outputPath = "";
+        private bool currentCompatMode;
+
+        public MainForm()
         {
             InitializeComponent();
+        }
+
+        private void compatModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            compatModeToolStripMenuItem.Checked = !compatModeToolStripMenuItem.Checked;
+            currentCompatMode = compatModeToolStripMenuItem.Checked;
+        }
+
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private void ImportFile_Click(object sender, EventArgs e)
@@ -49,7 +62,7 @@ namespace Blowfish_GUI
             fileSize = new FileInfo(importFilePath).Length;
 
             mmf_file = MemoryMappedFile.CreateFromFile(importFilePath, FileMode.Open);
-            StatusLabel.Text = "File loaded";
+            logBox.Text += string.Format("File loaded : {0}\r\n", importFilePath);
         }
 
         private void KeyDialog_FileOk(object sender, CancelEventArgs e)
@@ -58,13 +71,13 @@ namespace Blowfish_GUI
             keySize = new FileInfo(importKeyPath).Length;
 
             mmf_key = MemoryMappedFile.CreateFromFile(importKeyPath, FileMode.Open);
-            StatusLabel.Text = "Key loaded";
+            logBox.Text += string.Format("Key loaded : {0}\r\n", importKeyPath);
         }
 
         private void outputDialog_FileOk(object sender, CancelEventArgs e)
         {
             outputPath = outputDialog.FileName;
-            StatusLabel.Text = "Output selected";
+            logBox.Text += string.Format("Output file selected : {0}\r\n", outputPath);
         }
 
         private void encodingListFile_SelectedIndexChanged(object sender, EventArgs e)
@@ -72,43 +85,13 @@ namespace Blowfish_GUI
             var combo = (ListBox)sender;
             var selectedValue = combo.SelectedItem;
 
-            if (combo.Name.ToLower().Contains("key"))
-                StatusLabel.Text = "Key text type set to " + selectedValue;
-            else
-                StatusLabel.Text = "File text type set to " + selectedValue;
-        }
+            logBox.Text += string.Format("{0} text type set to {1}\r\n", combo.Name.ToLower().Contains("key") ? "Key" : "File", selectedValue);
 
-        private void backgroundDecrypt_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            StatusLabel.Text = "File converting";
-            progressBar.Increment(e.ProgressPercentage * progressBar.Maximum / 100);
-        }
-
-        private void backgroundEncrypt_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (!(mmf_file is null))
-                mmf_file.Dispose();
-            if (!(mmf_key is null))
-                mmf_key.Dispose();
-            StatusLabel.Text = "File encrypted";
-            System.Threading.Thread.Sleep(700);
-            progressBar.Value = 0;
-        }
-
-        private void backgroundDecrypt_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (!(mmf_file is null))
-                mmf_file.Dispose();
-            if (!(mmf_key is null))
-                mmf_key.Dispose();
-            StatusLabel.Text = "File decrypted";
-            System.Threading.Thread.Sleep(700);
-            progressBar.Value = 0;
         }
 
         private void decryptButton_Click(object sender, EventArgs e)
         {
-            if(beforeConverting())
+            if (beforeConverting())
             {
                 backgroundDecrypt.RunWorkerAsync();
             }
@@ -120,6 +103,34 @@ namespace Blowfish_GUI
             {
                 backgroundEncrypt.RunWorkerAsync();
             }
+        }
+
+        private void backgroundDecrypt_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            StatusLabel.Text = "Converting";
+            progressBar.Increment(e.ProgressPercentage * progressBar.Maximum / 100);
+        }
+
+        private void backgroundEncrypt_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (mmf_file != null)
+                mmf_file.Dispose();
+            if (mmf_key != null)
+                mmf_key.Dispose();
+            StatusLabel.Text = "File encrypted";
+            System.Threading.Thread.Sleep(700);
+            progressBar.Value = 0;
+        }
+
+        private void backgroundDecrypt_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (mmf_file != null)
+                mmf_file.Dispose();
+            if (mmf_key != null)
+                mmf_key.Dispose();
+            StatusLabel.Text = "File decrypted";
+            System.Threading.Thread.Sleep(700);
+            progressBar.Value = 0;
         }
 
         private void backgroundDecrypt_DoWork(object sender, DoWorkEventArgs e)
@@ -135,15 +146,15 @@ namespace Blowfish_GUI
                 if (worker.CancellationPending == true)
                 {
                     e.Cancel = true;
-                    if (!(mmf_file is null))
+                    if (mmf_file != null)
                         mmf_file.Dispose();
-                    if (!(mmf_key is null))
+                    if (mmf_key != null)
                         mmf_key.Dispose();
                 }
                 else
                 {
                     var bl = new BlowFish(keyInMemory);
-                    bl.compatMode = true;
+                    bl.compatMode = currentCompatMode;
                     worker.ReportProgress(25);
                     var decryptedBytes = bl.Decrypt_ECB(fileInMemory);
                     worker.ReportProgress(25);
@@ -168,15 +179,15 @@ namespace Blowfish_GUI
                 if (worker.CancellationPending == true)
                 {
                     e.Cancel = true;
-                    if (!(mmf_file is null))
+                    if (mmf_file != null)
                         mmf_file.Dispose();
-                    if (!(mmf_key is null))
+                    if (mmf_key != null)
                         mmf_key.Dispose();
                 }
                 else
                 {
                     var bl = new BlowFish(keyTextBox.Text);
-                    bl.compatMode = true;
+                    bl.compatMode = currentCompatMode;
                     worker.ReportProgress(25);
                     var decryptedBytes = bl.Encrypt_ECB(fileInMemory);
                     worker.ReportProgress(25);
@@ -196,7 +207,7 @@ namespace Blowfish_GUI
                 return false;
             }
 
-            if (mmf_file is null && mmf_key is null)
+            if (mmf_file == null && mmf_key == null)
             {
                 switch (encodingListFile.Text)
                 {
@@ -226,7 +237,7 @@ namespace Blowfish_GUI
                 return true;
             }
 
-            if (mmf_file is null)
+            if (mmf_file == null)
             {
                 switch (encodingListFile.Text)
                 {
@@ -242,7 +253,7 @@ namespace Blowfish_GUI
                 }
             }
 
-            if (mmf_key is null)
+            if (mmf_key == null)
             {
                 switch (encodingListFile.Text)
                 {
@@ -265,32 +276,32 @@ namespace Blowfish_GUI
             if (worker.CancellationPending == true)
             {
                 e.Cancel = true;
-                if (!(mmf_file is null))
+                if (mmf_file != null)
                     mmf_file.Dispose();
-                if (!(mmf_key is null))
+                if (mmf_key != null)
                     mmf_key.Dispose();
 
             }
             else
             {
-                if (!(mmf_file is null))
+                if (mmf_file != null)
                 {
                     var mmfAccessor = mmf_file.CreateViewAccessor();
                     fileInMemory = new byte[fileSize];
                     mmfAccessor.ReadArray<byte>(0, fileInMemory, 0, (int)fileSize);
-                    if (mmf_key is null)
+                    if (mmf_key == null)
                         worker.ReportProgress(12);
                     else
                         worker.ReportProgress(25);
                 }
 
-                if (!(mmf_key is null))
+                if (mmf_key != null)
                 {
                     var mmfAccessor = mmf_key.CreateViewAccessor();
                     keyInMemory = new byte[keySize];
                     mmfAccessor.ReadArray<byte>(0, keyInMemory, 0, (int)keySize);
 
-                    if (mmf_file is null)
+                    if (mmf_file == null)
                         worker.ReportProgress(13);
                     else
                         worker.ReportProgress(25);
